@@ -3,11 +3,9 @@ import select
 import sys
 from random import randint
 
-from table import Table
-from deck import Deck
-
 class Server:
     def __init__(self, options):
+        self.tables = {}
         print(options)
         self.server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -20,6 +18,11 @@ class Server:
 
         print(f'Listening on port {server_address[1]}')
 
+    def create_table(self, table_name, seats):
+        if table_name in tables:
+            print(f'table {table_name} already exists')
+            return
+        self.tables[table_name] = Table(max_players)
 
     def parse_options(self, options):
         for opt in options:

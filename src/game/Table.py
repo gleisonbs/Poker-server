@@ -1,14 +1,15 @@
 from itertools import combinations
 from deck import Deck
 from player import Player
-from round import Round
+from round import BettingRound
 from hand_eval import HandEvaluator
+from current_game import CurrentGame
 
 class Table:
     def __init__(self, max_players):
         self.max_players = max_players
         self.players = []
-        self.players_in_round = []
+        self.current_game = CurrentGame()
         self.pot = 0
         self.small_blind_position = 3
         self.small_blind_size = 5
@@ -29,16 +30,17 @@ class Table:
             return False
 
     def start(self):
-        while True:
-            self.pre_flop()
-            self.flop()
-            self.turn()
-            self.river()
+        pass
+        # while True:
+        #     self.pre_flop()
+        #     self.flop()
+        #     self.turn()
+        #     self.river()
 
     def pre_flop(self):
         self.post_blinds()
         self.deal_hands()
-        self.betting_round()
+        # self.betting_round()
         #self.is_round_in_progress = True
         #self.next_to_act = self.small_blind_pos + 2
         # if self.next_to_act >= self.max_players:
@@ -46,15 +48,6 @@ class Table:
         # print('NEXT_TO_ACT', self.next_to_act)
         # self.players_to_act = [p for p in range(self.next_to_act+1, 6)] + [p for p in range(0, self.next_to_act)]
         # print(self.players_to_act)
-
-    def flop(self):
-        pass
-    
-    def turn(self):
-        pass
-    
-    def river(self):
-        pass
         
     def post_blinds(self):
         self.pot += self.players[self.small_blind_position].post_small_blind(self.small_blind_size)
@@ -70,8 +63,8 @@ class Table:
             print(player)
 
     def remove_player_from_round(player):
-        self.players_in_round = [p for self.players_in_round if p != current_player_acting]
-    
+        self.players_in_round = [p for p in self.players_in_round if p != current_player_acting]
+
     def increase_pot_by(amount):
         self.pot += amount
 
@@ -126,7 +119,7 @@ class Table:
         return self.current_call - player.current_bettings
 
     def update_next_to_act(self):
-        while (self.next_to_act < len(self.players) and self.players[self.next_to_act] not in self.players_in_round)
+        while self.next_to_act < len(self.players) and self.players[self.next_to_act] not in self.players_in_round:
             self.next_to_act += 1
             
 

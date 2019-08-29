@@ -1,6 +1,4 @@
-import table
-
-class Menu:
+class MainMenu:
     def __init__(self):
         self.menu_text = """
         /$$$$$$$           /$$                          
@@ -32,7 +30,3 @@ class Menu:
             pass
         else:
             print("What?")
-
-
-menu = Menu()
-menu.display()

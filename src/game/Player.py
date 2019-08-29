@@ -11,6 +11,9 @@ class Player:
     def __str__(self):
         return f'Player {self.position}: {self.hand}'
 
+    def has_enough_funds(self, amount):
+        return self.stack >= amount
+
     def post_big_blind(self, bb_size):
         self.stack -= bb_size
         self.current_bettings += bb_size
