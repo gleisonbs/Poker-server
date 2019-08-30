@@ -1,9 +1,33 @@
 import socket
+from select import select
 
-import sys
-from random import randint
+class Connection:
+    def __init__(self, sock, conn_addr, is_server = False):
+        self.socket = sock
+        self.connection_address = conn_addr
+        self.is_server = is_server
 
-sys.path.append('../game')
-print(sys.path)
+    def read_from_socket(self):
+        readable_sockets, *_ = select([self.socket], [], [])
+        for _ in readable_sockets:
+            if self.is_server:
+                return self.accept()
+            else:
+                return self.recv()
+        return None
 
-from ..table import Table
+    def accept(self):
+        connection, connection_address = self.socket.accept()
+        connection.setblocking(0)
+        print(f'Connection from {connection_address}')
+        return (connection, connection_address)
+
+    def recv(self):
+        try:
+            return socket.recv(128)
+        except:
+            pass
+
+    def send(self, data):
+        data += '\n'
+        self.socket.sendall(data.encode())

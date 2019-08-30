@@ -1,131 +1,122 @@
 import socket
-import select
 import sys
+import os
+from select import select
 from random import randint
+from Connection import Connection
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from game import MainMenu
+
+class Table:
+    pass
 
 class Server:
     def __init__(self, options):
         self.tables = {}
-        print(options)
-        self.server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        server_address = ('localhost', randint(4000, 6001))
-        self.server_sock.bind(server_address)
-        self.server_sock.listen(1)
+        self.start_server()
         self.clients = []
-        self.table = Table()
-        self.parse_options(options)
 
-        print(f'Listening on port {server_address[1]}')
+    def start_server(self):
+        server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-    def create_table(self, table_name, seats):
-        if table_name in tables:
-            print(f'table {table_name} already exists')
-            return
+        connection_address = ('localhost', randint(4500, 6001))
+        server_sock.bind(connection_address)
+        server_sock.listen(1)
+        
+        self.server_connection = Connection(server_sock, connection_address, is_server = True)
+        print(f'Listening at port {connection_address[1]}')
+
+    def create_table(self, table_name, max_players):
+        if table_name in self.tables:
+            return f'table {table_name} already exists'
         self.tables[table_name] = Table(max_players)
 
-    def parse_options(self, options):
-        for opt in options:
-            if opt.startswith('-p'):
-                table_size = opt.split(':')[1]
-                self.table.max_players = int(table_size)
-                print('Table Size:', table_size)
+    def list_tables(self):
+        return '\n'.join([table_name for table_name in self.tables])
+            
+    # def parse_options(self, options):
+    #     for opt in options:
+    #         if opt.startswith('-p'):
+    #             table_size = opt.split(':')[1]
+    #             self.table.max_players = int(table_size)
+    #             print('Table Size:', table_size)
+
+    def show_menu_to_client(self, client):
+        client.send(f'{MainMenu.get()}')
 
     def run(self):
         while True:
-            if self.table.is_full():
-                if not self.table.is_round_in_progress:
-                    self.table.start_round()
-                    for player_conn, player_info in zip(self.clients, self.table.players):
-                        self.send(player_conn, str(player_info))
 
-                if self.table.next_to_act is not None:
-                    self.broadcast_table_info()
-                    self.send_players_info()
-                else:
-                    self.table.update_players_in_hand()
-                    self.table.current_call = 0
-                    for p in self.table.players:
-                        p.current_bettings = 0
+            new_client, client_addr = self.server_connection.read_from_socket()
+            if new_client:    
+                new_client_connection = Connection(new_client, client_addr)
+                self.clients.append(new_client_connection)
+                self.show_menu_to_client(new_client_connection)
+                    
+            for client in self.clients:
+                msg_from_client = client.read_from_socket()
+                if (msg_from_client):
+                    print(msg_from_client)
+                
 
-                    if len(self.table.cards_drawn) == 0:
-                        self.table.cards_drawn += self.table.deck.draw_cards(3)
-                    elif len(self.table.cards_drawn) == 3:
-                        self.table.cards_drawn += self.table.deck.draw_cards(1)
-                    elif len(self.table.cards_drawn) == 4:
-                        self.table.cards_drawn += self.table.deck.draw_cards(1)
+            # if self.table.is_full():
+            #     if not self.table.is_round_in_progress:
+            #         self.table.start_round()
+            #         for player_conn, player_info in zip(self.clients, self.table.players):
+            #             self.send(player_conn, str(player_info))
 
-                        self.table.decide_winner()
+            #     if self.table.next_to_act is not None:
+            #         self.broadcast_table_info()
+            #         self.send_players_info()
+            #     else:
+            #         self.table.update_players_in_hand()
+            #         self.table.current_call = 0
+            #         for p in self.table.players:
+            #             p.current_bettings = 0
 
-                        self.reset_table_state()
+            #         if len(self.table.cards_drawn) == 0:
+            #             self.table.cards_drawn += self.table.deck.draw_cards(3)
+            #         elif len(self.table.cards_drawn) == 3:
+            #             self.table.cards_drawn += self.table.deck.draw_cards(1)
+            #         elif len(self.table.cards_drawn) == 4:
+            #             self.table.cards_drawn += self.table.deck.draw_cards(1)
 
-                    print(self.table.cards_drawn)
-                    self.broadcast(f'{self.table.cards_drawn}')
+            #             self.table.decide_winner()
 
-            self.read_sockets()
+            #             self.reset_table_state()
 
-            if self.table.previous_action:
-                self.broadcast(self.table.previous_action)
+            #         print(self.table.cards_drawn)
+            #         self.broadcast(f'{self.table.cards_drawn}')
 
-    def reset_table_state(self):
-        self.table.cards_drawn = []
-        self.table.players_out = []
-        self.table.update_positions()
-        self.table.start_round()
+            # if self.table.previous_action:
+            #     self.broadcast(self.table.previous_action)
 
-    def read_sockets(self):
-        read_list = self.clients + [self.server_sock]
-        readable, writable, errored = select.select(read_list, [], [])
-        for s in readable:
-            if s is self.server_sock:
-                self.accept()
-            else:
-                self.recv()
+    # def send_players_info(self):
+    #     for player_seat, player in enumerate(self.table.players):
+    #         if player_seat not in self.table.players_out:
+    #             self.send(self.clients[player_seat], f'Hand: {self.table.players[player_seat].hand}')
+    #             self.send(self.clients[player_seat], f'Stack: {self.table.players[player_seat].stack}')
+    #             if player_seat == self.table.next_to_act:
+    #                 self.send(self.clients[player_seat], str(self.table.options))
 
-    def send_players_info(self):
-        for player_seat, player in enumerate(self.table.players):
-            if player_seat not in self.table.players_out:
-                self.send(self.clients[player_seat], f'Hand: {self.table.players[player_seat].hand}')
-                self.send(self.clients[player_seat], f'Stack: {self.table.players[player_seat].stack}')
-                if player_seat == self.table.next_to_act:
-                    self.send(self.clients[player_seat], str(self.table.options))
+    # def broadcast_table_info(self):
+    #     self.broadcast('\nPot: ' + str(self.table.pot))
+    #     self.broadcast('To Call: ' + str(self.table.call_value_for_player()))
+    #     self.broadcast('Min Raise: ' + str(self.table.current_call*2))
 
-    def broadcast_table_info(self):
-        self.broadcast('\nPot: ' + str(self.table.pot))
-        self.broadcast('To Call: ' + str(self.table.call_value_for_player()))
-        self.broadcast('Min Raise: ' + str(self.table.current_call*2))
-
-    def accept(self):
-        connection, client_address = self.server_sock.accept()
-        if not self.table.add_player(client_address):
-            self.send(connection, 'Table is full\n')
-            connection.close()
-            return False
-        else:
-            connection.setblocking(0)
-            self.clients.append(connection)
-            print(f'Connection from {client_address}')
-            return True
-
-    def recv(self):
-        for client in self.clients:
-            try:
-                data = client.recv(128)
-                if client is self.clients[self.table.next_to_act]:
-                    action = data.strip().decode()
-                    if action.split(' ')[0] in self.table.options:
-                        print(action)
-                        self.table.player_action(action)
-            except:
-                pass
-
-    def broadcast(self, data):
-        for c in self.clients:
-            self.send(c, data)
-
-    def send(self, dest, data):
-        data += '\n'
-        dest.sendall(data.encode())
+    # def recv(self):
+    #     for client in self.clients:
+    #         try:
+    #             data = client.recv(128)
+    #             if client is self.clients[self.table.next_to_act]:
+    #                 action = data.strip().decode()
+    #                 if action.split(' ')[0] in self.table.options:
+    #                     print(action)
+    #                     self.table.player_action(action)
+    #         except:
+    #             pass
 
 s = Server(sys.argv)
 s.run()

@@ -1,7 +1,8 @@
 class MainMenu:
-    def __init__(self):
-        self.menu_text = """
-        /$$$$$$$           /$$                          
+    @staticmethod
+    def get():
+        return """
+         /$$$$$$$           /$$                          
         | $$__  $$         | $$                          
         | $$  \ $$ /$$$$$$ | $$   /$$  /$$$$$$   /$$$$$$ 
         | $$$$$$$//$$__  $$| $$  /$$/ /$$__  $$ /$$__  $$
@@ -17,8 +18,8 @@ class MainMenu:
 
         : """
 
-    def display(self):
-        print(self.menu_text, end='')
+    @staticmethod
+    def choose_option():
         option = input()
         print(f'You chose {option}')
 
