@@ -49,9 +49,9 @@ class Server:
     def run(self):
         while True:
 
-            new_client, client_addr = self.server_connection.read_from_socket()
+            new_client = self.server_connection.read_from_socket()
             if new_client:    
-                new_client_connection = Connection(new_client, client_addr)
+                new_client_connection = Connection(new_client[0], new_client[1])
                 self.clients.append(new_client_connection)
                 self.show_menu_to_client(new_client_connection)
                     

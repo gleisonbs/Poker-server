@@ -8,7 +8,7 @@ class Connection:
         self.is_server = is_server
 
     def read_from_socket(self):
-        readable_sockets, *_ = select([self.socket], [], [])
+        readable_sockets, *_ = select([self.socket], [], [], 1)
         for _ in readable_sockets:
             if self.is_server:
                 return self.accept()
@@ -24,7 +24,9 @@ class Connection:
 
     def recv(self):
         try:
-            return socket.recv(128)
+            data = self.socket.recv(128)
+            data = data.strip().decode()
+            return data
         except:
             pass
 
