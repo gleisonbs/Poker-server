@@ -1,5 +1,6 @@
 class Player:
-    def __init__(self, address):
+    def __init__(self, username, address):
+        self.username = ''
         self.stack = 1000
         self.hand = []
         self.position = None
