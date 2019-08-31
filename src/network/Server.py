@@ -4,12 +4,11 @@ import os
 from select import select
 from random import randint
 from Connection import Connection
+from Request import Request, RequestType
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from game import Table
 from game import MainMenu
-
-class Table:
-    pass
 
 class Server:
     def __init__(self, options):
@@ -57,8 +56,23 @@ class Server:
                     
             for client in self.clients:
                 msg_from_client = client.read_from_socket()
-                if (msg_from_client):
-                    print(msg_from_client)
+                if msg_from_client:
+                    client_request = Request(msg_from_client)
+                    if not client_request:
+                        continue
+
+                    if client_request.type == RequestType.CREATE_TABLE:
+                        table_name = client_request.value[0]
+                        self.create_table(table_name, 2)
+
+                    elif client_request.type == RequestType.JOIN_TABLE:
+                        pass
+                    
+                    elif client_request.type == RequestType.LIST_TABLE:
+                        print(self.list_tables())
+                        
+                    print(msg_from_client, ' -> ', client_request)
+
                 
 
             # if self.table.is_full():
