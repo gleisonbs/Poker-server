@@ -64,7 +64,8 @@ class Server:
     def choose_action(self, request, client):
         if request.type == RequestType.CREATE_TABLE:
             table_name = request.value[0]
-            self.create_table(table_name, 2)
+            max_players = request.value[1]
+            self.create_table(table_name, max_players)
 
         elif request.type == RequestType.JOIN_TABLE:
             pass
@@ -74,6 +75,6 @@ class Server:
 
         elif request.type == RequestType.LIST_PLAYERS:
             client.send(self.list_players())
-                                        
-s = Server(sys.argv)
-s.run()
+
+if __name__ == '__main__':
+    Server(sys.argv).run()

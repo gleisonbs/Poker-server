@@ -1,5 +1,5 @@
 from enum import Enum
-from player import Player
+from Player import Player
 import ActionQueue
 
 class BettingRoundName(Enum):
@@ -42,6 +42,9 @@ class BettingRound:
     def player_should_post_bb(self, player):
         return player == self.players_to_act[1] and self.current_round == BettingRoundName.PRE_FLOP
 
+    def is_player_turn(self, player):
+        return player == self.players_to_act[0]
+
     def start(self):
         while self.players_to_act:
             ActionQueue.add_message_to_player("Your turn", self.players_to_act[0])
@@ -52,7 +55,7 @@ class BettingRound:
 
             player = action_from_player.player
 
-            if player != self.players_to_act[0]:
+            if not self.is_player_turn(player):
                 continue
 
             action, amount = action_from_player.value.split(':')

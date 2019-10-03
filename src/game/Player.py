@@ -1,11 +1,10 @@
 class Player:
-    def __init__(self, username, address):
+    def __init__(self, username):
         self.username = ''
         self.stack = 1000
         self.hand = []
         self.position = None
         self.current_bettings = 0
-        self.address = address
         self.is_big_blind = False
         self.is_small_blind = False
 
