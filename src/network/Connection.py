@@ -31,5 +31,4 @@ class Connection:
             pass
 
     def send(self, data):
-        data += '\n'
         self.socket.sendall(data.encode())

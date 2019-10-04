@@ -30,7 +30,8 @@ class Server:
     def create_table(self, table_name, max_players):
         if table_name in self.tables:
             return f'table {table_name} already exists'
-        self.tables[table_name] = Table(max_players)
+        self.tables[table_name] = Table(table_name, max_players)
+        return f'table {table_name} was created\n: '
 
     def list_players(self):
         formatted_player_list = '\nPlayers in the server:\n'
@@ -38,7 +39,9 @@ class Server:
 
     def list_tables(self):
         formatted_table_list = '\nTables in the server:\n'
-        return formatted_table_list + '\n'.join([table_name for table_name in self.tables])
+        for table_name in self.tables:
+            formatted_table_list += str(self.tables[table_name]) + '\n'
+        return formatted_table_list + '\n: '
 
     def show_menu_to_client(self, client):
         client.send(f'{MainMenu.get()}')
@@ -62,19 +65,22 @@ class Server:
                     self.choose_action(client_request, client)
     
     def choose_action(self, request, client):
+        result = ''
         if request.type == RequestType.CREATE_TABLE:
             table_name = request.value[0]
             max_players = request.value[1]
-            self.create_table(table_name, max_players)
+            result = self.create_table(table_name, max_players)
 
         elif request.type == RequestType.JOIN_TABLE:
-            pass
+            self.tables[request.value[0]].join(client)
         
         elif request.type == RequestType.LIST_TABLES:
-            client.send(self.list_tables())
+            result = self.list_tables()
 
         elif request.type == RequestType.LIST_PLAYERS:
-            client.send(self.list_players())
+            result = self.list_players()
+
+        client.send(result)
 
 if __name__ == '__main__':
     Server(sys.argv).run()
