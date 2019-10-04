@@ -6,8 +6,9 @@ from .Player import Player
 # from current_game import CurrentGame
 
 class Table:
-    def __init__(self, max_players):
+    def __init__(self, name, max_players):
         self.max_players = max_players
+        self.name = name
         self.players = []
         # self.current_game = CurrentGame()
         # self.pot = 0
@@ -22,9 +23,10 @@ class Table:
         # self.hand_evaluator = HandEvaluator()
         # self.min_raise_size = self.small_blind_size * 2
 
-    def join(self, player):
-        if not self.is_full():
-            self.players.append(Player(player))
+    def join(self, connection):
+        player = Player(connection)
+        if not self.is_full() and player not in self.players:
+            self.players.append(player)
             return True
         else:
             return False
@@ -154,3 +156,5 @@ class Table:
     #             print(h[0])
     #             h[0].stack += self.pot
 
+    def __str__(self):
+        return f'{self.name}: {len(self.players)}/{self.max_players}'
