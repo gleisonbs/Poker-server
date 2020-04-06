@@ -1,4 +1,4 @@
-from BettingRound import BettingRound, BettingRoundName
+from game.betting_round import BettingRound, BettingRoundName
 
 class CurrentGame:
     def __init__(self, players):

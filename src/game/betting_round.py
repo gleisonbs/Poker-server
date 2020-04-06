@@ -1,5 +1,5 @@
 from enum import Enum
-from Player import Player
+from game.player import Player
 import ActionQueue
 
 class BettingRoundName(Enum):

@@ -1,6 +1,6 @@
 # from itertools import combinations
 # from deck import Deck
-from .Player import Player
+from game.player import Player
 # from round import BettingRound
 # from hand_eval import HandEvaluator
 # from current_game import CurrentGame

@@ -2,12 +2,11 @@ import socket
 import sys
 import os
 from random import randint
-from Connection import Connection
-from Request import Request, RequestType
+from network.connection import Connection
+from network.request import Request, RequestType
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from game import Table
-from game import MainMenu
+from game.table import Table
+from game.main_menu import MainMenu
 
 class Server:
     def __init__(self, options):
@@ -82,5 +81,3 @@ class Server:
 
         client.send(result)
 
-if __name__ == '__main__':
-    Server(sys.argv).run()

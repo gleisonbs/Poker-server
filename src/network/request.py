@@ -1,5 +1,5 @@
 from enum import Enum
-from RequestSpecification import RequestSpecification
+from network.request_specification import RequestSpecification
 
 class RequestType(Enum):
     CREATE_TABLE = 'create_table'
