@@ -1,7 +1,10 @@
-class MainMenu:
-    @staticmethod
-    def get():
-        return """
+from unittest import TestCase
+from unittest.mock import patch
+from game.main_menu import MainMenu
+
+class MainMenuTest(TestCase):
+    def test_initial_message(self):
+        self.assertEqual(MainMenu.get(), """
          /$$$$$$$           /$$                          
         | $$__  $$         | $$                          
         | $$  \ $$ /$$$$$$ | $$   /$$  /$$$$$$   /$$$$$$ 
@@ -16,17 +19,11 @@ class MainMenu:
         2. Create table
         3. List tables
 
-        : """
+        : """)
 
-    @staticmethod
-    def choose_option():
-        option = input()
-
-        if (option == '1'):
-            print(f'You chose 1')
-        elif (option == '2'):
-            print(f'You chose 2')
-        elif (option == '3'):
-            print(f'You chose 3')
-        else:
-            print("What?")
+    def test_choose_option(self):
+        with patch('builtins.input', return_value='1'):
+            with patch('builtins.print') as mocked_print:
+                MainMenu.choose_option()
+                mocked_print.assert_called()
+                mocked_print.assert_called_with('You chose 1')
