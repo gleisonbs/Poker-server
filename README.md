@@ -1,0 +1,1 @@
+Status: [![Build Status](https://travis-ci.org/gleisonbs/Poker-server.svg?branch=master)](https://travis-ci.org/gleisonbs/Poker-server)
