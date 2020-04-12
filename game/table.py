@@ -7,6 +7,12 @@ from game.player import Player
 
 class Table:
     def __init__(self, name, max_players):
+        if max_players < 2:
+            raise ValueError('Number of max players in the table can\'t be less than 2')
+
+        if not name:
+            raise ValueError('Table name cannot be empty')
+
         self.max_players = max_players
         self.name = name
         self.players = []

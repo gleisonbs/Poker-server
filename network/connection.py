@@ -1,8 +1,9 @@
 import socket
 from select import select
 
+
 class Connection:
-    def __init__(self, sock, conn_addr, is_server = False):
+    def __init__(self, sock, conn_addr, is_server=False):
         self.socket = sock
         self.connection_address = conn_addr
         self.is_server = is_server
@@ -28,7 +29,7 @@ class Connection:
             data = data.strip().decode()
             return data
         except:
-            pass
+            return None
 
     def send(self, data):
         self.socket.sendall(data.encode())

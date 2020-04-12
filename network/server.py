@@ -5,25 +5,27 @@ from random import randint
 from network.connection import Connection
 from network.request import Request, RequestType
 
+from game.player import Player
 from game.table import Table
 from game.main_menu import MainMenu
 
+
 class Server:
-    def __init__(self, options):
+    def __init__(self):
         self.tables = {}
         self.players = []
-        self.start_server()
         self.clients = []
 
-    def start_server(self):
+    def create_listening_socket(self):
         server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         connection_address = ('localhost', randint(4500, 6001))
         server_sock.bind(connection_address)
         server_sock.listen(1)
-        
-        self.server_connection = Connection(server_sock, connection_address, is_server = True)
+
+        self.server_connection = Connection(
+            server_sock, connection_address, is_server=True)
         print(f'Listening at port {connection_address[1]}')
 
     def create_table(self, table_name, max_players):
@@ -45,16 +47,20 @@ class Server:
     def show_menu_to_client(self, client):
         client.send(f'{MainMenu.get()}')
 
-    def run(self):
+    def get_new_player_connection(self):
+        new_client_connection = self.server_connection.read_from_socket()
+        return new_client_connection
+
+    def main_loop(self):
         while True:
-            new_client = self.server_connection.read_from_socket()
-            if new_client:    
-                new_client_connection = Connection(new_client[0], new_client[1])
-                self.clients.append(new_client_connection)
+            new_player_connection = self.get_new_player_connection()
+            if new_player_connection:
+                self.players.append(
+                    self.make_new_player(new_player_connection))
                 self.show_menu_to_client(new_client_connection)
-                    
-            for client in self.clients:
-                msg_from_client = client.read_from_socket()
+
+            for player in self.players:
+                msg_from_player = player.read_from_socket()
                 if msg_from_client:
                     client_request = Request(msg_from_client)
                     if not client_request.is_valid:
@@ -62,7 +68,12 @@ class Server:
                         continue
 
                     self.choose_action(client_request, client)
-    
+
+    def add_new_player(new_player_connection):
+        new_player_connection = Connection(
+            new_player_connection[0], new_player_connection[1])
+        return Player(new_player_connection)
+
     def choose_action(self, request, client):
         result = ''
         if request.type == RequestType.CREATE_TABLE:
@@ -72,7 +83,7 @@ class Server:
 
         elif request.type == RequestType.JOIN_TABLE:
             self.tables[request.value[0]].join(client)
-        
+
         elif request.type == RequestType.LIST_TABLES:
             result = self.list_tables()
 
@@ -81,3 +92,7 @@ class Server:
 
         client.send(result)
 
+    def run(self):
+        self.create_listening_socket()
+        self.main_loop()
+            
