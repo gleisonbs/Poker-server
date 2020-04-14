@@ -5,13 +5,15 @@ from random import randint
 from network.connection import Connection
 from network.request import Request, RequestType
 
+from game.lobby import Lobby
+from game.main_menu import MainMenu
 from game.player import Player
 from game.table import Table
-from game.main_menu import MainMenu
 
 
 class Server:
     def __init__(self):
+        self.lobby = Lobby()
         self.tables = {}
         self.players = []
         self.clients = []
@@ -67,7 +69,8 @@ class Server:
                         new_client_connection.send('Invalid request')
                         continue
 
-                    self.choose_action(client_request, client)
+                    self.choose_action(client_request, new_client_connection)
+                    self.lobby.handle_request(request, new_client_connection)
 
     def add_new_player(new_player_connection):
         new_player_connection = Connection(

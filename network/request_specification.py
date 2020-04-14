@@ -18,7 +18,12 @@ class RequestSpecification:
             return self.specifications[action](parameters)
 
     def create_table_specification(self, parameters):
-        return len(parameters) == 4
+        has_4_parameters = len(parameters) == 4
+        max_players = parameters[3]
+        has_valid_max_players = max_players.isnumeric() \
+            and int(max_players) >= 2 \
+            and int(max_players) <= 10
+        return has_4_parameters and has_valid_max_players
 
     def join_table_specification(self, parameters):
         return len(parameters) == 3

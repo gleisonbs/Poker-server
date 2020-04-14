@@ -12,20 +12,20 @@ class Request():
         self.is_valid = self.is_valid_request(request)
         if self.is_valid:
             self.parameters = request.split(':')
-            self.type = self.get_request_type()
-            self.value = self.get_request_value()
-            self.player = self.get_player()
 
     def is_valid_request(self, request):
         return RequestSpecification().is_satisfied_by(request)       
 
-    def get_player(self):
-        return self.parameters[1]
-    
-    def get_request_type(self):
+    @property
+    def type(self):
         return RequestType(self.parameters[0])
 
-    def get_request_value(self):
+    @property
+    def player(self):
+        return self.parameters[1]
+
+    @property
+    def values(self):
         return self.parameters[2:]
     
     def __str__(self):

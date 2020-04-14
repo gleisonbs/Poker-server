@@ -7,6 +7,12 @@ from game.player import Player
 
 class Table:
     def __init__(self, name, max_players):
+        if not isinstance(name, str):
+            raise ValueError('name parameter must be a string')
+
+        if not isinstance(max_players, int):
+            raise ValueError('max_players parameter must be an integer')
+
         if max_players < 2:
             raise ValueError('Number of max players in the table can\'t be less than 2')
 
