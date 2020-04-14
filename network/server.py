@@ -12,17 +12,21 @@ from game.table import Table
 
 
 class Server:
-    def __init__(self):
+    def __init__(self, config={}):
+        self.config = config
         self.lobby = Lobby()
         self.tables = {}
         self.players = []
-        self.clients = []
+        self.connected_clients = []
 
-    def create_listening_socket(self):
+    def create_listening_socket(self, port=None):
         server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-        connection_address = ('localhost', randint(4500, 6001))
+        if not port:
+            port = randint(4500, 6001)
+
+        connection_address = ('localhost', port)
         server_sock.bind(connection_address)
         server_sock.listen(1)
 
@@ -52,30 +56,35 @@ class Server:
     def get_new_player_connection(self):
         new_client_connection = self.server_connection.read_from_socket()
         return new_client_connection
+    
+    def is_closing(self, request):
+        return request == 'close' and self.config.get('DEBUG') == True
 
     def main_loop(self):
-        while True:
+        should_close = self.is_closing('')
+        while not should_close:
             new_player_connection = self.get_new_player_connection()
             if new_player_connection:
-                self.players.append(
-                    self.make_new_player(new_player_connection))
-                self.show_menu_to_client(new_client_connection)
+                self.connected_clients.append(new_player_connection)
+                self.show_menu_to_client(new_player_connection)
 
-            for player in self.players:
-                msg_from_player = player.read_from_socket()
+            for client in self.connected_clients:
+                msg_from_client = client.read_from_socket()
                 if msg_from_client:
+                    
+                    should_close = self.is_closing(msg_from_client)
+                    if should_close:
+                        [c.close() for c in self.connected_clients]
+                        self.server_connection.close()
+                        break
+
                     client_request = Request(msg_from_client)
                     if not client_request.is_valid:
-                        new_client_connection.send('Invalid request')
+                        new_player_connection.send('Invalid request')
                         continue
 
-                    self.choose_action(client_request, new_client_connection)
-                    self.lobby.handle_request(request, new_client_connection)
-
-    def add_new_player(new_player_connection):
-        new_player_connection = Connection(
-            new_player_connection[0], new_player_connection[1])
-        return Player(new_player_connection)
+                    self.choose_action(client_request, new_player_connection)
+                    self.lobby.handle_request(request, new_player_connection)
 
     def choose_action(self, request, client):
         result = ''
@@ -95,7 +104,7 @@ class Server:
 
         client.send(result)
 
-    def run(self):
-        self.create_listening_socket()
+    def run(self, port):
+        self.create_listening_socket(port)
         self.main_loop()
             

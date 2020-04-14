@@ -21,7 +21,8 @@ class Connection:
         connection, connection_address = self.socket.accept()
         connection.setblocking(0)
         print(f'Connection from {connection_address}')
-        return (connection, connection_address)
+        
+        return Connection(connection, connection_address)
 
     def recv(self):
         try:
@@ -33,3 +34,6 @@ class Connection:
 
     def send(self, data):
         self.socket.sendall(data.encode())
+
+    def close(self):
+        self.socket.close()
