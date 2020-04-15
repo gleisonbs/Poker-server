@@ -28,7 +28,7 @@ class LobbyTest(TestCase):
         lobby.handle_request(Request('create_table:me:my table:2'), client)
         result = lobby.handle_request(Request('create_table:me:my table:2'), client)
 
-        self.assertEqual(result, 'table "my table" already exists')
+        self.assertEqual(result, 'Table "my table" already exists')
         self.assertEqual(len(lobby.tables), 1)
 
 

@@ -1,3 +1,4 @@
+from random import randint
 from unittest import TestCase
 from threading import Thread
 import socket
@@ -7,9 +8,9 @@ from network.server import Server
 
 class ServerTest(TestCase):
     def setUp(self):
-        server = Server({'DEBUG': True})
-        port = 5641
-        self.server_thread = Thread(target=server.run, args=(port,))
+        self.server = Server({'DEBUG': True})
+        port = randint(5600, 6600)
+        self.server_thread = Thread(target=self.server.run, args=(port,))
         self.server_thread.start()
 
         sleep(1)
@@ -42,6 +43,17 @@ class ServerTest(TestCase):
         3. List tables
 
         : """)
+
+    def test_create_table(self):
+        self.client_sock.recv(4096)
+        self.client_sock.send('create_table:me:my table:2'.encode())
+
+        msg_from_server = self.client_sock.recv(4096)
+        msg_from_server = msg_from_server.decode()
+
+        print(msg_from_server)
+
+        self.assertEqual(msg_from_server, 'Table "my table" was created\n: ')
 
     def tearDown(self):
         self.client_sock.send('close'.encode())

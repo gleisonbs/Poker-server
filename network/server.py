@@ -34,29 +34,13 @@ class Server:
             server_sock, connection_address, is_server=True)
         print(f'Listening at port {connection_address[1]}')
 
-    def create_table(self, table_name, max_players):
-        if table_name in self.tables:
-            return f'table {table_name} already exists'
-        self.tables[table_name] = Table(table_name, max_players)
-        return f'table {table_name} was created\n: '
-
-    def list_players(self):
-        formatted_player_list = '\nPlayers in the server:\n'
-        return formatted_player_list + '\n'.join([player_name for player_name in self.players])
-
-    def list_tables(self):
-        formatted_table_list = '\nTables in the server:\n'
-        for table_name in self.tables:
-            formatted_table_list += str(self.tables[table_name]) + '\n'
-        return formatted_table_list + '\n: '
-
     def show_menu_to_client(self, client):
         client.send(f'{MainMenu.get()}')
 
     def get_new_player_connection(self):
         new_client_connection = self.server_connection.read_from_socket()
         return new_client_connection
-    
+
     def is_closing(self, request):
         return request == 'close' and self.config.get('DEBUG') == True
 
@@ -71,7 +55,7 @@ class Server:
             for client in self.connected_clients:
                 msg_from_client = client.read_from_socket()
                 if msg_from_client:
-                    
+
                     should_close = self.is_closing(msg_from_client)
                     if should_close:
                         [c.close() for c in self.connected_clients]
@@ -83,28 +67,9 @@ class Server:
                         new_player_connection.send('Invalid request')
                         continue
 
-                    self.choose_action(client_request, new_player_connection)
-                    self.lobby.handle_request(request, new_player_connection)
-
-    def choose_action(self, request, client):
-        result = ''
-        if request.type == RequestType.CREATE_TABLE:
-            table_name = request.value[0]
-            max_players = request.value[1]
-            result = self.create_table(table_name, max_players)
-
-        elif request.type == RequestType.JOIN_TABLE:
-            self.tables[request.value[0]].join(client)
-
-        elif request.type == RequestType.LIST_TABLES:
-            result = self.list_tables()
-
-        elif request.type == RequestType.LIST_PLAYERS:
-            result = self.list_players()
-
-        client.send(result)
+                    self.lobby.handle_request(
+                        client_request, new_player_connection)
 
     def run(self, port):
         self.create_listening_socket(port)
         self.main_loop()
-            
