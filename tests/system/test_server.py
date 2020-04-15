@@ -46,14 +46,15 @@ class ServerTest(TestCase):
 
     def test_create_table(self):
         self.client_sock.recv(4096)
+
+        self.assertNotIn('my table', self.server.lobby.tables.keys())
         self.client_sock.send('create_table:me:my table:2'.encode())
 
         msg_from_server = self.client_sock.recv(4096)
         msg_from_server = msg_from_server.decode()
 
-        print(msg_from_server)
-
         self.assertEqual(msg_from_server, 'Table "my table" was created\n: ')
+        self.assertIn('my table', self.server.lobby.tables.keys())
 
     def tearDown(self):
         self.client_sock.send('close'.encode())
