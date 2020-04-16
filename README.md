@@ -1,4 +1,4 @@
-Tests status: [![Build Status](https://travis-ci.org/gleisonbs/Poker-server.svg?branch=master)](https://travis-ci.org/gleisonbs/Poker-server)
+# Poker Server [![Build Status](https://travis-ci.org/gleisonbs/Poker-server.svg?branch=master)](https://travis-ci.org/gleisonbs/Poker-server)
 
 Small poker server
 Connect through sockets

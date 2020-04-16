@@ -18,6 +18,7 @@ class Server:
         self.tables = {}
         self.players = []
         self.connected_clients = []
+        self.is_running = False
 
     def create_listening_socket(self, port=None):
         server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -33,6 +34,7 @@ class Server:
         self.server_connection = Connection(
             server_sock, connection_address, is_server=True)
         print(f'Listening at port {connection_address[1]}')
+        self.is_running = True
 
     def show_menu_to_client(self, client):
         client.send(f'{MainMenu.get()}')
@@ -64,11 +66,11 @@ class Server:
 
                     client_request = Request(msg_from_client)
                     if not client_request.is_valid:
-                        new_player_connection.send('Invalid request')
+                        client.send('Invalid request')
                         continue
 
                     self.lobby.handle_request(
-                        client_request, new_player_connection)
+                        client_request, client)
 
     def run(self, port):
         self.create_listening_socket(port)
