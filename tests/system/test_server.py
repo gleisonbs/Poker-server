@@ -68,6 +68,19 @@ class ServerTest(TestCase):
         self.assertIn('Test Table 1', self.server.lobby.tables.keys())
         self.assertIn('Test Table 2', self.server.lobby.tables.keys())
 
+    def test_join_table(self):
+        self.server.lobby._create_table('Test Table', 2)
+
+        self.assertEqual(len(self.server.lobby.tables['Test Table'].players), 0)
+
+        self.client_sock.send('join_table:me:Test Table'.encode())
+
+        msg_from_server = self.client_sock.recv(1024)
+        msg_from_server = msg_from_server.decode()
+        print(msg_from_server)
+
+        self.assertEqual(len(self.server.lobby.tables['Test Table'].players), 1)
+
     def tearDown(self):
         self.client_sock.send('close'.encode())
         self.client_sock.close()

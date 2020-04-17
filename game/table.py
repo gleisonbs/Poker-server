@@ -38,9 +38,9 @@ class Table:
     def join(self, player):
         if not self.is_full() and player not in self.players:
             self.players.append(player)
-            return True
+            return f'Player "{player.nickname}" joined "{self.name}"'
         else:
-            return False
+            return f'Player {player.nickname} couldn\'t join {self.name}'
 
     def start(self):
         pass

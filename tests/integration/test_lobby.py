@@ -58,13 +58,15 @@ class LobbyTest(TestCase):
 
     def test_join_table(self):
         lobby = Lobby()
-        lobby._create_table('Test table', 6)
+        table_name = 'Test Table'
+        player_name = 'Test Player'
+        lobby._create_table(table_name, 6)
 
-        self.assertEqual(len(lobby.tables['Test table'].players), 0)
+        self.assertEqual(len(lobby.tables[table_name].players), 0)
 
-        request = Request('join_table:me:Test table')
-        player = Player(None, 'Test Player')
+        request = Request(f'join_table:me:{table_name}')
+        player = Player(None, player_name)
         result = lobby.handle_request(request, player)
 
-        self.assertEqual(len(lobby.tables['Test table'].players), 1)
-        self.assertEqual(result, True)
+        self.assertEqual(len(lobby.tables[table_name].players), 1)
+        self.assertEqual(result, f'Player "{player_name}" joined "{table_name}"')
