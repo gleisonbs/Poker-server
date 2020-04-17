@@ -35,8 +35,7 @@ class Table:
         # self.hand_evaluator = HandEvaluator()
         # self.min_raise_size = self.small_blind_size * 2
 
-    def join(self, connection):
-        player = Player(connection)
+    def join(self, player):
         if not self.is_full() and player not in self.players:
             self.players.append(player)
             return True

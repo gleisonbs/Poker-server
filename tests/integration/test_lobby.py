@@ -1,6 +1,7 @@
 from unittest import TestCase
 from unittest.mock import patch
 from game.lobby import Lobby
+from game.player import Player
 from network.request import Request
 
 class LobbyTest(TestCase):
@@ -54,3 +55,16 @@ class LobbyTest(TestCase):
         result = lobby.handle_request(Request('list_tables:me'), client)
 
         self.assertEqual(result, '\nTables in the server:\nTest table 1: 0/6\nTest table 2: 0/9\n\n: ')
+
+    def test_join_table(self):
+        lobby = Lobby()
+        lobby._create_table('Test table', 6)
+
+        self.assertEqual(len(lobby.tables['Test table'].players), 0)
+
+        request = Request('join_table:me:Test table')
+        player = Player(None, 'Test Player')
+        result = lobby.handle_request(request, player)
+
+        self.assertEqual(len(lobby.tables['Test table'].players), 1)
+        self.assertEqual(result, True)

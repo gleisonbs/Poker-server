@@ -10,6 +10,8 @@ from game.main_menu import MainMenu
 from game.player import Player
 from game.table import Table
 
+from uuid import uuid4
+
 
 class Server:
     def __init__(self, config={}):
@@ -51,26 +53,27 @@ class Server:
         while not should_close:
             new_player_connection = self.get_new_player_connection()
             if new_player_connection:
+                self.lobby.add_player(Player(new_player_connection, str(uuid4())))
                 self.connected_clients.append(new_player_connection)
                 self.show_menu_to_client(new_player_connection)
 
-            for client in self.connected_clients:
-                msg_from_client = client.read_from_socket()
+            for player in self.lobby.players:
+                msg_from_client = player.connection.read_from_socket()
                 if msg_from_client:
 
                     should_close = self.is_closing(msg_from_client)
                     if should_close:
-                        [c.close() for c in self.connected_clients]
+                        [p.connection.close() for p in self.players]
                         self.server_connection.close()
                         break
 
                     client_request = Request(msg_from_client)
                     if not client_request.is_valid:
-                        client.send('Invalid request')
+                        player.connection.send('Invalid request')
                         continue
 
                     self.lobby.handle_request(
-                        client_request, client)
+                        client_request, player)
 
     def run(self, port):
         self.create_listening_socket(port)
