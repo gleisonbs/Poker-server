@@ -8,6 +8,10 @@ class Lobby:
 
     def add_player(self, player):
         self.players.append(player)
+    
+    def close(self):
+        for player in self.players:
+            player.connection.close()
 
     def handle_request(self, request, player):
         result = ''

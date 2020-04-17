@@ -58,8 +58,7 @@ class Server:
 
                     should_close = self.is_closing(msg_from_client)
                     if should_close:
-                        [p.connection.close() for p in self.players]
-                        self.server_connection.close()
+                        self.close()
                         break
 
                     client_request = Request(msg_from_client)
@@ -69,6 +68,10 @@ class Server:
 
                     self.lobby.handle_request(
                         client_request, player)
+
+    def close(self):
+        self.lobby.close()
+        self.server_connection.close()
 
     def run(self, port):
         self.create_listening_socket(port)
