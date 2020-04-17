@@ -6,7 +6,6 @@ from network.connection import Connection
 from network.request import Request, RequestType
 
 from game.lobby import Lobby
-from game.main_menu import MainMenu
 from game.player import Player
 from game.table import Table
 
@@ -38,9 +37,6 @@ class Server:
         print(f'Listening at port {connection_address[1]}')
         self.is_running = True
 
-    def show_menu_to_client(self, client):
-        client.send(f'{MainMenu.get()}')
-
     def get_new_player_connection(self):
         new_client_connection = self.server_connection.read_from_socket()
         return new_client_connection
@@ -55,7 +51,6 @@ class Server:
             if new_player_connection:
                 self.lobby.add_player(Player(new_player_connection, str(uuid4())))
                 self.connected_clients.append(new_player_connection)
-                self.show_menu_to_client(new_player_connection)
 
             for player in self.lobby.players:
                 msg_from_client = player.connection.read_from_socket()

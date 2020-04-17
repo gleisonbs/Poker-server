@@ -20,28 +20,8 @@ class ServerTest(TestCase):
         self.wait_server()
 
         self.client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_sock.settimeout(2)
         self.client_sock.connect(('127.0.0.1', port))
-
-        self.first_server_msg = self.client_sock.recv(1024)
-        self.first_server_msg = self.first_server_msg.decode()
-
-    def test_show_menu(self):
-        self.assertEqual(self.first_server_msg, """
-         /$$$$$$$           /$$                          
-        | $$__  $$         | $$                          
-        | $$  \ $$ /$$$$$$ | $$   /$$  /$$$$$$   /$$$$$$ 
-        | $$$$$$$//$$__  $$| $$  /$$/ /$$__  $$ /$$__  $$
-        | $$____/| $$  \ $$| $$$$$$/ | $$$$$$$$| $$  \__/
-        | $$     | $$  | $$| $$_  $$ | $$_____/| $$      
-        | $$     |  $$$$$$/| $$ \  $$|  $$$$$$$| $$      
-        |__/      \______/ |__/  \__/ \_______/|__/      
-        
-
-        1. Join table
-        2. Create table
-        3. List tables
-
-        : """)
 
     def test_create_table(self):
         self.assertNotIn('my table', self.server.lobby.tables.keys())
@@ -77,7 +57,6 @@ class ServerTest(TestCase):
 
         msg_from_server = self.client_sock.recv(1024)
         msg_from_server = msg_from_server.decode()
-        print(msg_from_server)
 
         self.assertEqual(len(self.server.lobby.tables['Test Table'].players), 1)
 
