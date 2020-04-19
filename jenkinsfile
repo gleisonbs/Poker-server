@@ -1,6 +1,6 @@
 job('poker-server') {
     scm {
-        git() {
+        git('git://github.com/gleisonbs/Poker-server.git') {
             node / gitConfigName('DSL user')
             node / gitConfigEmail('jenkins-dsl@newtech.academy')
         }
