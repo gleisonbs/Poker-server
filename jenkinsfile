@@ -11,15 +11,14 @@ job('poker-server') {
     }
 
     steps {
-        shell('''
-               #!/bin/bash
-               export WORKSPACE=`pwd`
-               virtualenv --python=python3.7 venv
-               source venv/bin/activate
-               pip install -r requirements.txt
-               pip install pytest
+        shell('''#!/bin/bash
+export WORKSPACE=`pwd`
+virtualenv --python=python3.7 venv
+source venv/bin/activate
+pip install -r requirements.txt
+pip install pytest
 
-               python3.7 -m pytest tests/
+python3.7 -m pytest tests/
             ''')
     }
 }
