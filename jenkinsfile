@@ -1,0 +1,21 @@
+job('poker-server') {
+    scm {
+        git() {
+            node / gitConfigName('DSL user')
+            node / gitConfigEmail('jenkins-dsl@newtech.academy')
+        }
+    }
+
+    triggers {
+        scm('H/5 * * * *')
+    }
+
+    steps {
+        shell('export WORKSPACE=`pwd` && \
+               virtualenv --python=python3.7 venv && \
+               source venv/bin/activate && \
+               pip install -r requirements.txt && \
+               pip install pytest && \
+               python3.7 -m pytest tests/')
+    }
+}
