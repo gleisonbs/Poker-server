@@ -11,7 +11,7 @@ job('poker-server') {
     }
 
     steps {
-        shell('#!/bin/bash
+        shell('#!/bin/bash \
                export WORKSPACE=`pwd` && \
                virtualenv --python=python3.7 venv && \
                source venv/bin/activate && \
