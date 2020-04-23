@@ -3,13 +3,15 @@ pipeline {
     stages {
         stage('build') {
             steps {
-                sh 'pip install -r requirements.txt --user'
-                sh 'pip install pytest --user'
+                bash 'python -m venv env'
+                bash 'source ./env/bin/activate'
+                bash 'pip install -r requirements.txt'
+                bash 'pip install pytest'
             }
         }
         stage('test') {
             steps {
-                sh 'python -m pytest tests/'
+                bash 'python -m pytest tests/'
             }
         }
     }
