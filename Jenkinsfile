@@ -4,7 +4,8 @@ pipeline {
         stage('build') {
             steps {
                 sh 'python -m venv env'
-                sh 'source ./env/bin/activate'
+                sh 'chmod +x env/bin/activate'
+                sh '/env/bin/./activate'
                 sh 'pip install -r requirements.txt'
                 sh 'pip install pytest'
             }
