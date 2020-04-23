@@ -1,24 +1,16 @@
-job('poker-server') {
-    scm {
-        git('git://github.com/gleisonbs/Poker-server.git') {
-            node / gitConfigName('DSL user')
-            node / gitConfigEmail('jenkins-dsl@newtech.academy')
+pipeline {
+    agent { docker { image 'python:3.8.2' } }
+    stages {
+        stage('build') {
+            steps {
+                sh 'pip install -r requirements'
+                sh 'pip install pytest'
+            }
         }
-    }
-
-    triggers {
-        scm('H/5 * * * *')
-    }
-
-    steps {
-        shell('''#!/bin/bash
-export WORKSPACE=`pwd`
-virtualenv --python=python3.7 venv
-source venv/bin/activate
-pip install -r requirements.txt
-pip install pytest
-
-python3.7 -m pytest tests/
-            ''')
+        stage('test') {
+            steps {
+                sh 'python -m pytest tests/'
+            }
+        }
     }
 }
