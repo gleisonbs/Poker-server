@@ -2,6 +2,7 @@ node {
     checkout scm
     def myTestContainer = docker.image('python:3.8.2')
     myTestContainer.pull()
+    triggers { cron('* * * * *') }
     stage('Preparation') {
         myTestContainer.inside {
             sh '''#!/bin/bash
