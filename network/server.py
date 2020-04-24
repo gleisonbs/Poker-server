@@ -16,9 +16,6 @@ class Server:
     def __init__(self, config={}):
         self.config = config
         self.lobby = Lobby()
-        self.tables = {}
-        self.players = []
-        self.connected_clients = []
         self.is_running = False
 
     def create_listening_socket(self, port=None):
