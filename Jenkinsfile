@@ -4,7 +4,7 @@ node {
     myTestContainer.pull()
     properties(
         [
-            pipelineTriggers([pollSCM('* * * * *')])
+            pipelineTriggers([pollSCM('*/10 * * * *')])
         ]
     )
     stage('Preparation') {
