@@ -1,9 +1,7 @@
 node {
+    checkout scm
     docker.image('python:3.8.2').inside {
-        stage('Checkout') {
-            checkout scm
-        }
-        state('Install Deps') {
+        stage('Install Deps') {
             sh '''#!/bin/bash
                 python -m venv env
                 source env/bin/activate
