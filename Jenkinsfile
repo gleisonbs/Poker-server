@@ -3,8 +3,6 @@ node {
     myTestContainer.pull()
     stage('Preparation') {
         checkout scm
-    }
-    stage('Test') {
         myTestContainer.inside {
             sh '''#!/bin/bash
                 python -m venv env
@@ -12,6 +10,13 @@ node {
                 pip install --upgrade pip
                 pip install -r requirements.txt --no-cache-dir
                 pip install pytest --no-cache-dir
+            '''
+        }
+    }
+    stage('Test') {
+        myTestContainer.inside {
+            sh '''#!/bin/bash
+                source env/bin/activate
                 python -m pytest tests/
             '''
         }
