@@ -6,7 +6,7 @@ node {
         def myTestContainer = docker.image('python:3.8.2')
         myTestContainer.pull()
         myTestContainer.inside {
-            bash '''#!/bin/bash
+            sh '''#!/bin/bash
                 python -m venv env
                 source env/bin/activate
                 pip install --upgrade pip
