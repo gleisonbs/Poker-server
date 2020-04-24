@@ -16,7 +16,6 @@ node {
     stage('Unit Tests') {
         myTestContainer.inside {
             sh '''#!/bin/bash
-                source env/bin/activate
                 python -m pytest tests/unit/
             '''
         }
@@ -24,7 +23,6 @@ node {
     stage('Integration Tests') {
         myTestContainer.inside {
             sh '''#!/bin/bash
-                source env/bin/activate
                 python -m pytest tests/integration/
             '''
         }
@@ -32,7 +30,6 @@ node {
     stage('System Tests') {
         myTestContainer.inside {
             sh '''#!/bin/bash
-                source env/bin/activate
                 python -m pytest tests/system/
             '''
         }
