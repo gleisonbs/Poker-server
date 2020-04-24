@@ -4,7 +4,7 @@ node {
     myTestContainer.pull()
     properties(
         [
-            pipelineTriggers([cron('* * * * *')])
+            pipelineTriggers([cron('0 4 * * *')])
         ]
     )
     stage('Preparation') {
