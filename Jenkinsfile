@@ -9,6 +9,9 @@ node {
     )
     stage('Preparation') {
         myTestContainer.inside {
+            withCredentials([file(credentialsId: 'pubsub-storage', variable: 'SERVICE_ACCOUNT')]) {
+                sh '''#!/bin/bash/echo $SERVICE_ACCOUNT'''
+            }
             sh '''#!/bin/bash
                 python -m venv env
                 source env/bin/activate
