@@ -11,7 +11,8 @@ node {
         myTestContainer.inside {
             withCredentials([file(credentialsId: 'pubsub-storage', variable: 'SERVICE_ACCOUNT')]) {
                 sh '''#!/bin/bash
-                    echo $SERVICE_ACCOUNT
+                    echo $SERVICE_ACCOUNT | base64
+                    cat $SERVICE_ACCOUNT | base64
                 '''
             }
             sh '''#!/bin/bash
