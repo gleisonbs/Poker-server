@@ -1,9 +1,16 @@
+from enum import IntEnum
 # from itertools import combinations
-# from deck import Deck
+from game.deck import Deck
 from game.player import Player
+
 # from round import BettingRound
 # from hand_eval import HandEvaluator
 # from current_game import CurrentGame
+
+class TwoGamePositions(IntEnum):
+    Dealer = 0
+    UTG = 1
+
 
 class Table:
     def __init__(self, name, max_players):
@@ -23,10 +30,13 @@ class Table:
         self.name = name
         self.players = []
         # self.current_game = CurrentGame()
-        # self.pot = 0
-        # self.small_blind_position = 3
-        # self.small_blind_size = 5
-        # self.current_call_size = 0
+        self.pot = 0
+        self.small_blind_position = 0
+        self.small_blind_size = 5
+        self.current_call_size = 0
+        self.next_to_act = 0
+        self.players_in_round = []
+        self.remaining_to_act = []
         # self.players_out = []
         # self.options = ['CALL', 'FOLD', 'RAISE']
         # self.is_round_in_progress = False
@@ -38,85 +48,111 @@ class Table:
     def join(self, player):
         if not self.is_full() and player not in self.players:
             self.players.append(player)
-            return f'Player "{player.nickname}" joined "{self.name}"'
-        else:
-            return f'Player {player.nickname} couldn\'t join {self.name}'
+            return True
+        return False
 
     def start(self):
-        pass
+        self.pre_flop_setup()
         # while True:
-        #     self.pre_flop()
+        self.pre_flop()
         #     self.flop()
         #     self.turn()
         #     self.river()
 
-    # def pre_flop(self):
-    #     self.post_blinds()
-    #     self.deal_hands()
-    #     # self.betting_round()
-    #     #self.is_round_in_progress = True
-    #     #self.next_to_act = self.small_blind_pos + 2
-    #     # if self.next_to_act >= self.max_players:
-    #     #     self.next_to_act = self.next_to_act - self.max_players
-    #     # print('NEXT_TO_ACT', self.next_to_act)
-    #     # self.players_to_act = [p for p in range(self.next_to_act+1, 6)] + [p for p in range(0, self.next_to_act)]
-    #     # print(self.players_to_act)
+    def pre_flop_setup(self):
+        self.players_in_round = [p for p in self.players]
+        self.remaining_to_act = [p for p in self.players]
+
+    def pre_flop(self):
+        self.post_blinds()
+        self.deal_hands()
+        self.betting_round()
+        #self.is_round_in_progress = True
+        #self.next_to_act = self.small_blind_pos + 2
+        # if self.next_to_act >= self.max_players:
+        #     self.next_to_act = self.next_to_act - self.max_players
+        # print('NEXT_TO_ACT', self.next_to_act)
+        # self.players_to_act = [p for p in range(self.next_to_act+1, 6)] + [p for p in range(0, self.next_to_act)]
+        # print(self.players_to_act)
         
-    # def post_blinds(self):
-    #     self.pot += self.players[self.small_blind_position].post_small_blind(self.small_blind_size)
-    #     self.pot += self.players[self.small_blind_position+1].post_big_blind(self.small_blind_size*2)
-    #     self.current_call_size += self.small_blind_size*2
+    def post_blinds(self):
+        self.pot += self.players[self.small_blind_position].post_small_blind(self.small_blind_size)
+        self.pot += self.players[self.small_blind_position+1].post_big_blind(self.small_blind_size*2)
+        self.current_call_size += self.small_blind_size*2
 
-    # def deal_hands(self):
-    #     self.deck = Deck()
-    #     for position, player in enumerate(self.players):
-    #         hand = self.deck.draw_cards(2)
-    #         player.hand = hand
-    #         player.position = position
-    #         print(player)
+    def deal_hands(self):
+        self.deck = Deck()
+        for position, player in enumerate(self.players):
+            hand = self.deck.draw_cards(2)
+            player.hand = hand
+            player.position = position
 
-    # def remove_player_from_round(player):
-    #     self.players_in_round = [p for p in self.players_in_round if p != current_player_acting]
+    def remove_player_from_round(self, player):
+        self.players_in_round = [p for p in self.players_in_round if p != player]
 
     # def increase_pot_by(amount):
     #     self.pot += amount
 
-    # def betting_round(self, action, value = 0):
-    #     print(action)
-    #     action = action.upper()
+    def get_winner(self):
+        print(self.players_in_round,  len(self.players_in_round))
+        if len(self.players_in_round) == 1:
+            return self.players_in_round[0]
 
-    #     current_player_acting = self.players[self.next_to_act]
+    def update_winnings(self, winner):
+        winner.stack += self.pot
+        self.pot = 0
+        self.remaining_to_act = []
 
-    #     if action == 'FOLD':
-    #         self.previous_action = f'Player {self.next_to_act} folded'
-    #         self.remove_player_from_round(current_player_acting)
+    def betting_round(self):
+        winner = None
+        while self.remaining_to_act:
+            winner = self.get_winner()
+            if winner:
+                self.update_winnings(winner)
+                print("Winner is", winner)
+                break
 
-    #     elif action == 'CALL':
-    #         self.previous_action = f'Player {self.next_to_act} called'
-    #         value = self.call_value_for_player(current_player_acting)
-    #         next_to_act.call(value)
-    #         self.increase_pot_by(value)
+            current_player_acting = self.players_in_round[self.next_to_act]
+            action = current_player_acting.get_action()
 
-    #     elif action == 'RAISE':
-    #         if value < self.min_raise_size:
-    #             print(f'Raise too low (must be >= {self.current_call*2})')
-    #             return
+            print('Players In Round:', self.players_in_round)
+            print('Next to Act:', self.next_to_act)
+            print('To play:', current_player_acting)
+            print('Action:', action)
 
-    #         self.previous_action = f'Player {self.next_to_act} raised'
+            if action == 'FOLD':
+                print(current_player_acting, 'Folded')
+                self.previous_action = f'Player {self.next_to_act} folded'
+                self.remove_player_from_round(current_player_acting)
+ 
+            elif action == 'CALL':
+                self.previous_action = f'Player {current_player_acting} called'
+                value = self.call_value_for_player(current_player_acting)
+                current_player_acting.call(value)
+                self.pot += value
+                self.next_to_act = (self.next_to_act + 1) % len(self.players_in_round)
 
-    #         next_to_act.raise_bet(value)
-    #         self.increase_pot_by(value)
-    #         self.current_call = value
+            elif action == 'RAISE':
+                if value < self.min_raise_size:
+                    print(f'Raise too low (must be >= {self.current_call_size*2})')
+                    return
 
-    #         self.set_next_player_to_act()
+                self.previous_action = f'Player {self.next_to_act} raised'
 
-    #         print('PLAYER TO ACT:', self.players_to_act)
-    #     else:
-    #         print('UNRECOGNIZED ACTION')
-    #         return
+                next_to_act.raise_bet(value)
+                self.increase_pot_by(value)
+                self.current_call_size = value
 
-    #     print(self.previous_action)
-    #     self.update_next_to_act()
+                self.set_next_player_to_act()
+
+                print('PLAYER TO ACT:', self.players_to_act)
+            else:
+                print('UNRECOGNIZED ACTION')
+                return
+
+            # self.update_next_to_act()
+            print()
+
 
     # def update_positions(self):
     #     self.small_blind_pos += 1
@@ -126,13 +162,15 @@ class Table:
     def is_full(self):
         return len(self.players) == self.max_players
 
-    # def call_value_for_player(self, player):
-    #     return self.current_call - player.current_bettings
+    def call_value_for_player(self, player):
+        return self.current_call_size - player.current_bettings
 
-    # def update_next_to_act(self):
-    #     while self.next_to_act < len(self.players) and self.players[self.next_to_act] not in self.players_in_round:
-    #         self.next_to_act += 1
-            
+    def update_next_to_act(self):
+        player_index = self.players_in_round.index(current_player)
+        next_player_index = player_index + 1
+        if next_player_index >= len(self.players_in_round):
+            next_player_index = 0
+        self.next_to_act = next_player_index
 
     # def update_players_in_hand(self):
     #     if self.next_to_act is None:
@@ -168,4 +206,4 @@ class Table:
     #             h[0].stack += self.pot
 
     def __str__(self):
-        return f'{self.name}: {len(self.players)}/{self.max_players}'
+        return f'{self.name}: {len(self.players)}/{self.max_players} - Pot {self.pot}'

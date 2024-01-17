@@ -10,7 +10,10 @@ class Player:
         self.is_small_blind = False
 
     def __str__(self):
-        return f'Player {self.position}: {self.hand}'
+        return f'Player {self.nickname} ({"Dealer" if self.position == 0 else self.position}) {self.hand} - Stack {self.stack}'
+    
+    def __repr__(self):
+        return f'Player {self.nickname} ({"Dealer" if self.position == 0 else self.position}) {self.hand} - Stack {self.stack}'
 
     def has_enough_funds(self, amount):
         return self.stack >= amount
@@ -46,3 +49,10 @@ class Player:
         self.stack -= value
         self.current_bettings += value
         return value
+
+    def get_action(self):
+        action = None
+        while action not in ['fold', 'check', 'raise', 'call']:
+            action = input()
+        return action.upper()
+        
