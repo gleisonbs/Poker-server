@@ -50,9 +50,21 @@ class Player:
         self.current_bettings += value
         return value
 
-    def get_action(self):
+    def get_action(self, call_amount, current_bet_amount = 0):
         action = None
-        while action not in ['fold', 'check', 'raise', 'call']:
+        allowed_actions = ['fold']
+        if call_amount > 0:
+            allowed_actions.append('call')
+        else:
+            allowed_actions.append('check')
+
+        if self.stack > 0:
+            if current_bet_amount:
+                allowed_actions.append('raise')
+            else:
+                allowed_actions.append('bet')
+
+        while action not in allowed_actions:
             action = input()
         return action.upper()
         
