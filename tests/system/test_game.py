@@ -14,8 +14,8 @@ class GameTest(TestCase):
         player_big_blind = Player(None, "big_blind")
 
         table = Table("Main table", 2)
-        table.join(player_dealer)
         table.join(player_big_blind)
+        table.join(player_dealer)
 
         table.pre_flop_setup()
         table.pre_flop()
@@ -30,8 +30,8 @@ class GameTest(TestCase):
         player_big_blind = Player(None, "big_blind")
 
         table = Table("Main table", 2)
-        table.join(player_dealer)
         table.join(player_big_blind)
+        table.join(player_dealer)
 
         table.pre_flop_setup()
         table.pre_flop()
@@ -46,8 +46,8 @@ class GameTest(TestCase):
         player_big_blind = Player(None, "big_blind")
 
         table = Table("Main table", 2)
-        table.join(player_dealer)
         table.join(player_big_blind)
+        table.join(player_dealer)
 
         table.pre_flop_setup()
         table.pre_flop()
@@ -63,8 +63,8 @@ class GameTest(TestCase):
         player_big_blind = Player(None, "big_blind")
 
         table = Table("Main table", 2)
-        table.join(player_dealer)
         table.join(player_big_blind)
+        table.join(player_dealer)
 
         table.pre_flop_setup()
         table.pre_flop()
@@ -76,19 +76,19 @@ class GameTest(TestCase):
 
     @patch('builtins.input', side_effect=['call', 'check', 'check', 'bet 100', 'fold'])
     def test_headsup_big_blind_folds_postflop_after_bet(self, mock_input):
-        player_dealer = Player(None, "dealer")
         player_big_blind = Player(None, "big_blind")
+        player_dealer = Player(None, "dealer")
 
         table = Table("Main table", 2)
-        table.join(player_dealer)
         table.join(player_big_blind)
+        table.join(player_dealer)
 
         table.pre_flop_setup()
         table.pre_flop()
         table.flop()
 
-        self.assertEqual(player_dealer.stack, 1010)
         self.assertEqual(player_big_blind.stack, 990)
+        self.assertEqual(player_dealer.stack, 1010)
 
 
     def tearDown(self):
