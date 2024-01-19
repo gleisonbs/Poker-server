@@ -1,3 +1,5 @@
+from game.enums.two_game_positions import TwoGamePositions
+
 class Player:
     def __init__(self, connection, nickname=''):
         self.connection = connection
@@ -10,23 +12,18 @@ class Player:
         self.is_small_blind = False
 
     def __str__(self):
-        return f'Player {self.nickname} ({"Dealer" if self.position == 0 else self.position}) {self.hand} - Stack {self.stack}'
+        return f'Player ({TwoGamePositions(self.position).name}) {self.hand} - Stack {self.stack}'
     
     def __repr__(self):
-        return f'Player {self.nickname} ({"Dealer" if self.position == 0 else self.position}) {self.hand} - Stack {self.stack}'
+        return f'Player ({TwoGamePositions(self.position).name}) {self.hand} - Stack {self.stack}'
 
     def has_enough_funds(self, amount):
         return self.stack >= amount
 
-    def post_big_blind(self, bb_size):
-        self.stack -= bb_size
-        self.current_bettings += bb_size
-        return bb_size
-
-    def post_small_blind(self, sb_size):
-        self.stack -= sb_size
-        self.current_bettings += sb_size
-        return sb_size
+    def post_blind(self, blind_size):
+        self.stack -= blind_size
+        self.current_bettings += blind_size
+        return blind_size
 
 #    def fold(self):
 #        pass
@@ -64,8 +61,10 @@ class Player:
             else:
                 allowed_actions.append('bet')
 
+        print('allowed_actions',call_amount, allowed_actions)
         while action not in allowed_actions:
             action_and_amount = input()
+            print('action_and_amount', action_and_amount)
             action_and_amount = action_and_amount.split(' ')
             if len(action_and_amount) > 1:
                 action, amount = action_and_amount
