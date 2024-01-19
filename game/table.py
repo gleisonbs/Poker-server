@@ -33,6 +33,11 @@ class Table:
         self.remaining_to_act = []
         self.small_blind_position = 0
         self.small_blind_size = 5
+        self.flop_cards = []
+        
+    def rotate_list(self, list_to_rotate, n_rotations):
+        start = len(list_to_rotate) - n_rotations
+        return list_to_rotate[start:] + list_to_rotate[:start]
 
     def join(self, player):
         if not self.is_full() and player not in self.players:
@@ -49,17 +54,20 @@ class Table:
         #     self.river()
 
     def pre_flop_setup(self):
+        self.deck = Deck()
+        self.deck.shuffle()
         self.previous_action = None
         self.players_in_round = [p for p in self.players]
 
     def pre_flop(self):
-        print('PRE FLOP')
+        print('PRE FLOP '.ljust(70, '='))
         self.post_blinds()
         self.deal_hands()
         self.betting_round()
 
     def flop(self):
-        print('FLOP')
+        print('FLOP '.ljust(70, '='))
+        self.deal_flop()
         self.betting_round()
         
     def post_blinds(self):
@@ -71,11 +79,13 @@ class Table:
         self.current_call_size += self.small_blind_size*2
 
     def deal_hands(self):
-        self.deck = Deck()
         for position, player in enumerate(self.players):
             hand = self.deck.draw_cards(2)
             player.hand = hand
             player.position = position
+        
+    def deal_flop(self):
+        self.flop_cards = self.deck.draw_cards(3)
 
     def remove_player_from_round(self, player):
         self.players_in_round = [p for p in self.players_in_round if p != player]
@@ -91,7 +101,9 @@ class Table:
 
     def get_next_to_act(self, previous_action):
         if previous_action is None and len(self.players_in_round) == 2:
-            self.next_to_act = (self.next_to_act + 1) % len(self.players_in_round)
+            self.next_to_act = 0
+            while self.players[self.next_to_act] not in self.players_in_round:
+                self.next_to_act = (self.next_to_act + 1) % len(self.players_in_round)
             return self.players_in_round[self.next_to_act]
 
         if previous_action == 'FOLD':
@@ -101,53 +113,67 @@ class Table:
 
         return self.players_in_round[self.next_to_act]
 
+    def update_players_to_act(self, previous_action):
+        print('previous action', previous_action)
+        print('0 remaining_to_act', self.remaining_to_act)
+        if previous_action in ['CALL', 'CHECK', 'BET']:
+            self.remaining_to_act = self.rotate_list(self.remaining_to_act, 1)
+        
+        print('1 remaining_to_act', self.remaining_to_act)
+        if previous_action in ['BET']:
+            self.remaining_to_act.pop()
+
+
+        print('2 remaining_to_act', self.remaining_to_act)
+        return self.remaining_to_act[0]
+
     def betting_round(self):
-        winner = None
         self.remaining_to_act = [p for p in self.players_in_round]
-        while self.remaining_to_act:
+        self.next_to_act = 0
+        previous_action = None
+        while True:
             winner = self.get_winner()
             if winner:
                 self.update_winnings(winner)
                 print("Winner is", winner)
                 break
+            
+            if not self.remaining_to_act:
+                break
 
-            current_player_acting = self.get_next_to_act(self.previous_action)
-            print('Players In Round:', self.players_in_round)
+            current_player_acting = self.remaining_to_act[0]
             print('To play:', current_player_acting)
-            call_amount = self.call_value_for_player(current_player_acting)
-            action = current_player_acting.get_action(call_amount)
-            print('Action:', action)
+            call_amount = self.call_amount_for_player(current_player_acting)
+            action, amount = current_player_acting.get_action(call_amount)
+            print('Action:', action, '/ Amount:', amount)
 
-            self.remaining_to_act.remove(current_player_acting)
-            self.previous_action = action
+            if current_player_acting in self.remaining_to_act:
+                self.remaining_to_act.remove(current_player_acting)
+
             if action == 'FOLD':
                 print(current_player_acting, 'Folded')
                 self.remove_player_from_round(current_player_acting)
 
             elif action == 'CHECK':
                 ...
- 
+
             elif action == 'CALL':
-                value = self.call_value_for_player(current_player_acting)
-                current_player_acting.call(value)
-                self.pot += value
+                amount = self.call_amount_for_player(current_player_acting)
+                current_player_acting.call(amount)
+                self.pot += amount
 
-            elif action == 'RAISE':
-                if value < self.min_raise_size:
-                    print(f'Raise too low (must be >= {self.current_call_size*2})')
-                    return
+            elif action == 'BET':
+                current_player_acting.bet(amount)
+                self.pot += amount
+                self.current_call_size += amount
+                self.remaining_to_act = [p for p in self.players_in_round]
+                self.update_players_to_act(previous_action)
 
-                next_to_act.raise_bet(value)
-                self.increase_pot_by(value)
-                self.current_call_size = value
-
-                self.set_next_player_to_act()
-
-                print('PLAYER TO ACT:', self.players_to_act)
             else:
                 print('UNRECOGNIZED ACTION')
                 return
 
+            previous_action = action
             print('Pot:', self.pot)
             print()
 
@@ -160,7 +186,7 @@ class Table:
     def is_full(self):
         return len(self.players) == self.max_players
 
-    def call_value_for_player(self, player):
+    def call_amount_for_player(self, player):
         return self.current_call_size - player.current_bettings
 
     def update_next_to_act(self):
@@ -204,4 +230,6 @@ class Table:
     #             h[0].stack += self.pot
 
     def __str__(self):
-        return f'{self.name}: {len(self.players)}/{self.max_players} - Pot {self.pot}'
+        return f'{self.name}: {len(self.players)}/{self.max_players}' \
+            f'\nPot: {self.pot}' \
+            f'\nFlop: {self.flop_cards}'
