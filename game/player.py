@@ -1,5 +1,6 @@
 from game.enums.two_game_positions import TwoGamePositions
 
+
 class Player:
     def __init__(self, connection, nickname=''):
         self.connection = connection
@@ -13,7 +14,7 @@ class Player:
 
     def __str__(self):
         return f'Player ({TwoGamePositions(self.position).name}) {self.hand} - Stack {self.stack}'
-    
+
     def __repr__(self):
         return f'Player ({TwoGamePositions(self.position).name}) {self.hand} - Stack {self.stack}'
 
@@ -41,13 +42,12 @@ class Player:
         self.current_bettings += amount
         return amount
 
-    def raise_bet(self, value):
-        value -= self.current_bettings
-        self.stack -= value
-        self.current_bettings += value
-        return value
+    def raise_bet(self, amount):
+        self.stack -= amount
+        self.current_bettings += amount
+        return amount
 
-    def get_action(self, call_amount, current_bet_amount = 0):
+    def get_action(self, call_amount, current_bet_amount):
         action = None
         allowed_actions = ['fold']
         if call_amount > 0:
@@ -61,7 +61,7 @@ class Player:
             else:
                 allowed_actions.append('bet')
 
-        print('allowed_actions',call_amount, allowed_actions)
+        print('allowed_actions', call_amount, allowed_actions)
         while action not in allowed_actions:
             action_and_amount = input()
             print('action_and_amount', action_and_amount)
@@ -73,4 +73,3 @@ class Player:
                 action = action_and_amount[0]
                 amount = 0
         return action.upper(), amount
-        
