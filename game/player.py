@@ -39,10 +39,10 @@ class Player:
         self.current_bettings += value
         return value
 
-    def bet(self, value):
-        self.stack -= value
-        self.current_bettings += value
-        return value
+    def bet(self, amount):
+        self.stack -= amount
+        self.current_bettings += amount
+        return amount
 
     def raise_bet(self, value):
         value -= self.current_bettings
@@ -65,6 +65,13 @@ class Player:
                 allowed_actions.append('bet')
 
         while action not in allowed_actions:
-            action = input()
-        return action.upper()
+            action_and_amount = input()
+            action_and_amount = action_and_amount.split(' ')
+            if len(action_and_amount) > 1:
+                action, amount = action_and_amount
+                amount = float(amount)
+            else:
+                action = action_and_amount[0]
+                amount = 0
+        return action.upper(), amount
         
