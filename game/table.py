@@ -116,7 +116,7 @@ class Table:
         self.players_in_round = [
             p for p in self.players_in_round if p != player]
 
-    def get_winner(self):
+    def check_has_single_player(self):
         if len(self.players_in_round) == 1:
             return self.players_in_round[0]
 
@@ -213,7 +213,7 @@ class Table:
 
             print('Pot:', self.pot)
 
-            winner = self.get_winner()
+            winner = self.check_has_single_player()
             if winner:
                 self.update_winnings(winner)
                 print("Winner is", winner)
@@ -221,14 +221,19 @@ class Table:
             print()
 
         if self.river_cards:
-            winner_hand = (100_000, None)
-            hand_eval = HandEvaluator()
-            print(self.flop_cards + self.turn_cards + self.river_cards)
-            for player in self.players_in_round:
-                print("Player hand", player.hand)
-                all_cards = player.hand + self.flop_cards + self.turn_cards + self.river_cards
-                best_player_hand = hand_eval.get_best_hand(all_cards, 5)
-                print(best_player_hand)
+            winner = self.get_winner()
+            print("Winner is", winner)
+            self.update_winnings(winner)
+
+    def get_winner(self):
+        hand_eval = HandEvaluator()
+        best_hands = []
+        table_cards = self.flop_cards + self.turn_cards + self.river_cards
+        for player in self.players_in_round:
+            all_cards = player.hand + table_cards
+            best_player_hand = hand_eval.get_best_hand(all_cards, 5)
+            best_hands.append(best_player_hand + (player,))
+        return min(best_hands, key=lambda x: x[0])[2]
 
     def is_full(self):
         return len(self.players) == self.max_players
