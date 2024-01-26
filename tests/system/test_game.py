@@ -119,5 +119,21 @@ class GameTest(TestCase):
         self.assertEqual(player_big_blind.stack, 890)
         self.assertEqual(player_dealer.stack, 1110)
 
+    @patch('builtins.input', side_effect=['call', 'check', 'bet 100', 'raise 250', 'raise 750', 'fold'])
+    def test_headsup_dealer_folds_postflop_after_reraise(self, mock_input):
+        player_big_blind = Player(None, "big_blind")
+        player_dealer = Player(None, "dealer")
+
+        table = Table("Main table", 2)
+        table.join(player_big_blind)
+        table.join(player_dealer)
+
+        table.pre_flop_setup()
+        table.pre_flop()
+        table.flop()
+
+        self.assertEqual(player_big_blind.stack, 1260)
+        self.assertEqual(player_dealer.stack, 740)
+
     def tearDown(self):
         ...
