@@ -1,11 +1,11 @@
 from enum import IntEnum
-# from itertools import combinations
+from itertools import combinations
+
 from game.deck import Deck
 from game.player import Player
 from game.enums.two_game_positions import TwoGamePositions
-
+from game.hand_evaluator import HandEvaluator
 # from round import BettingRound
-# from hand_eval import HandEvaluator
 # from current_game import CurrentGame
 
 
@@ -21,6 +21,8 @@ class Table:
         # self.previous_action = ''
         self.current_call_size = 0
         self.flop_cards = []
+        self.turn_cards = []
+        self.river_cards = []
         self.max_players = max_players
         self.name = name
         self.next_to_act = 0
@@ -75,7 +77,20 @@ class Table:
     def flop(self):
         print('FLOP '.ljust(70, '='))
         self.remaining_to_act = [p for p in self.players_in_round]
-        self.deal_flop()
+        self.flop_cards = self.deck.draw_cards(3)
+        print(self.flop_cards)
+        self.betting_round()
+
+    def turn(self):
+        print('TURN '.ljust(70, '='))
+        self.remaining_to_act = [p for p in self.players_in_round]
+        self.turn_cards = self.deck.draw_cards(1)
+        self.betting_round()
+
+    def river(self):
+        print('RIVER '.ljust(70, '='))
+        self.remaining_to_act = [p for p in self.players_in_round]
+        self.river_cards = self.deck.draw_cards(1)
         self.betting_round()
 
     def post_blinds(self):
@@ -96,9 +111,6 @@ class Table:
             hand = self.deck.draw_cards(2)
             player.hand = hand
             player.position = position
-
-    def deal_flop(self):
-        self.flop_cards = self.deck.draw_cards(3)
 
     def remove_player_from_round(self, player):
         self.players_in_round = [
@@ -173,6 +185,7 @@ class Table:
 
             elif action == 'CALL':
                 amount = self.call_amount_for_player(current_player_acting)
+                print('Amount to call:', amount)
                 current_player_acting.call(amount)
                 self.pot += amount
 
@@ -207,10 +220,15 @@ class Table:
                 break
             print()
 
-    # def update_positions(self):
-    #     self.small_blind_pos += 1
-    #     if self.small_blind_pos > self.max_players:
-    #         self.small_blind_pos = 0
+        if self.river_cards:
+            winner_hand = (100_000, None)
+            hand_eval = HandEvaluator()
+            print(self.flop_cards + self.turn_cards + self.river_cards)
+            for player in self.players_in_round:
+                print("Player hand", player.hand)
+                all_cards = player.hand + self.flop_cards + self.turn_cards + self.river_cards
+                best_player_hand = hand_eval.get_best_hand(all_cards, 5)
+                print(best_player_hand)
 
     def is_full(self):
         return len(self.players) == self.max_players
