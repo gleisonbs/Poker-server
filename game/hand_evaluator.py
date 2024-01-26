@@ -19,9 +19,19 @@ class HandEvaluator:
         hand_info = self.hands_table.all_hands[prime_hand]
         return hand_info
 
+    def get_best_hand(self, cards, pick_n):
+        best_hand = (100_000,)
+        hand_combinations = combinations(cards, pick_n)
+        for hand in hand_combinations:
+            hand_value = self.evaluate(hand)
+            if hand_value[0] < best_hand[0]:
+                best_hand = min(best_hand, hand_value, key=lambda x: x[0])
+        return best_hand
+
     class __HandsTable:
         def __init__(self):
-            self.cards = ("A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A")
+            self.cards = ("A", "2", "3", "4", "5", "6", "7",
+                          "8", "9", "T", "J", "Q", "K", "A")
             self.prime_cards = {"2": 2, "3": 3, "4": 5, "5": 7, "6": 11, "7": 13, "8": 17, "9": 19, "T": 23, "J": 29,
                                 "Q": 31, "K": 37, "A": 41}
             self.prime_flush = 43
@@ -82,7 +92,6 @@ class HandEvaluator:
                 if is_flush:
                     hand += "F"
                 self.add_hands_to_table(hand)
-
 
         def three_of_a_kind(self):
             for c1 in self.cards[:0:-1]:
